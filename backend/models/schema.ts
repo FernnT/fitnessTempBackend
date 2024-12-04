@@ -14,9 +14,9 @@ export const user = pgTable("User", {
 	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 });
 
-export const workout = pgTable("Workout", {
+export const exercises = pgTable("Exercises", {
 	// You can use { mode: "bigint" } if numbers are exceeding js number limitations
-	workoutId: bigint("workout_id", { mode: "number" }).primaryKey().generatedByDefaultAsIdentity({ name: "Workout_id_seq", startWith: 1, increment: 1, minValue: 1}),
+	exerciseId: bigint("exercise_id", { mode: "number" }).primaryKey().generatedByDefaultAsIdentity({ name: "Workout_id_seq", startWith: 1, increment: 1, minValue: 1}),
 	name: varchar().notNull(),
 	category: varchar().notNull(),
 	description: text().notNull(),
@@ -34,7 +34,7 @@ export const workoutPlans = pgTable("Workout Plans", {
 	// You can use { mode: "bigint" } if numbers are exceeding js number limitations
 	userId: bigint("user_id", { mode: "number" }).notNull(),
 	name: varchar().notNull(),
-	level: varchar().notNull(),
+	intensity: varchar().notNull(),
 	durationDays: smallint("duration_days").notNull(),
 	goal: varchar().notNull(),
 	progress: smallint().notNull(),
@@ -58,11 +58,15 @@ export const userWorkoutExercise = pgTable("User Workout Exercise", {
 	// You can use { mode: "bigint" } if numbers are exceeding js number limitations
 	planId: bigint("plan_id", { mode: "number" }).notNull(),
 	// You can use { mode: "bigint" } if numbers are exceeding js number limitations
-	workoutId: bigint("workout_id", { mode: "number" }).notNull(),
+	exerciseId: bigint("exercise_Id", { mode: "number" }).notNull(),
 	sets: smallint(),
 	reps: smallint(),
 	durationMin: real("duration_min"),
 	restTimeSec: smallint("rest_time_sec"),
+	//TODO: add a field for the user to input the weight they used for the exercise
+	//TODO: add a field for the user to input the distance they covered for the exercise
+	//TODO: add a field for the user to input the time they took to complete the exercise
+	//TODO: add a field for the user to input the calories they burned for the exercise
 	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 }, (table) => {
 	return {
@@ -72,8 +76,8 @@ export const userWorkoutExercise = pgTable("User Workout Exercise", {
 			name: "User Workout Exercise_plan_id_fkey"
 		}),
 		userWorkoutExerciseWorkoutIdFkey: foreignKey({
-			columns: [table.workoutId],
-			foreignColumns: [workout.workoutId],
+			columns: [table.exerciseId],
+			foreignColumns: [exercises.exerciseId],
 			name: "User Workout Exercise_workout_id_fkey"
 		}),
 	}
@@ -85,7 +89,7 @@ export const records = pgTable("Records", {
 	// You can use { mode: "bigint" } if numbers are exceeding js number limitations
 	userId: bigint("user_id", { mode: "number" }).notNull(),
 	// You can use { mode: "bigint" } if numbers are exceeding js number limitations
-	workoutId: bigint("workout_id", { mode: "number" }).notNull(),
+	exerciseId: bigint("exercise_id", { mode: "number" }).notNull(),
 	date: date().notNull(),
 	setsCompleted: smallint("sets_completed"),
 	repsCompleted: smallint("reps_completed"),
@@ -100,8 +104,8 @@ export const records = pgTable("Records", {
 			name: "Records_user_id_fkey"
 		}),
 		recordsWorkoutIdFkey: foreignKey({
-			columns: [table.workoutId],
-			foreignColumns: [workout.workoutId],
+			columns: [table.exerciseId],
+			foreignColumns: [exercises.exerciseId],
 			name: "Records_workout_id_fkey"
 		}),
 	}
