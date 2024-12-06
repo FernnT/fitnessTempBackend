@@ -14,7 +14,8 @@ export const register = async (req: Request, res: Response) => {
     //validate the user input
     const {error} = userRegSchema.validate(req.body);
     if (error) {  
-        return res.status(400).json({ message: error.details[0].message });
+         res.status(400).json({ message: error.details[0].message });
+         return;
          }
 
     //check if the user already exists
@@ -23,7 +24,8 @@ export const register = async (req: Request, res: Response) => {
     })
     if(userExists){
         console.log("User already exists");
-        return res.status(400).send({error: "User already exists"});
+         res.status(400).send({error: "User already exists"});
+         return;
         
     }
 
@@ -47,15 +49,17 @@ export const register = async (req: Request, res: Response) => {
     const token = jwt.sign(
             { id: newUser[0].userId, email: newUser[0].email, username: newUser[0].username },
             process.env.JWT_SECRET,
-            { expiresIn: '1h' }
+            { expiresIn: '24h' }
         );
 
         //send response
-         return res.status(201).json({ token });
+          res.status(201).json({ token });
+          return;
     
     }catch(error){
         console.log("Error in registering", error);
         res.status(500).send({error: error});
+        return; 
     }
 }
 
@@ -66,7 +70,8 @@ export const login = async (req: Request, res: Response) => {
     //validate the user input
     const {error} = userLoginSchema.validate(req.body);
     if (error) {  
-        return res.status(400).json({ message: error.details[0].message });
+         res.status(400).json({ message: error.details[0].message });
+         return;
          }
 
     //check if the user exists
@@ -75,7 +80,8 @@ export const login = async (req: Request, res: Response) => {
     })
     if(!userExists){
         console.log("User does not exist");
-        return res.status(400).send({error: "User does not exist"});
+         res.status(400).send({error: "User does not exist"});
+         return;
         
     }
 
@@ -83,22 +89,25 @@ export const login = async (req: Request, res: Response) => {
     const validPass = await bcrypt.compare(req.body.password, userExists.password);
     if(!validPass){
         console.log("Invalid password");
-        return res.status(400).send({error: "Invalid password"});
+         res.status(400).send({error: "Invalid password"});
+         return;
     }
 
     //generate a token
     const token = jwt.sign(
             { id: userExists.userId, email: userExists.email, username: userExists.username },
             process.env.JWT_SECRET,
-            { expiresIn: '1h' }
+            { expiresIn: '24h' }
         );
 
         //send response
-         return res.status(200).json({ token });
+          res.status(200).json({ token });
+          return;
     
     }catch(error){
         console.log("Error in login", error);
         res.status(500).send({error: error});
+        return;
     }
 }
    

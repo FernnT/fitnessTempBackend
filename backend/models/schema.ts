@@ -1,4 +1,4 @@
-import { pgTable, bigint, varchar, smallint, real, timestamp, text, foreignKey, date, boolean } from "drizzle-orm/pg-core"
+import { pgTable, bigint, varchar, smallint, real, timestamp, text, foreignKey, date, boolean, pgEnum} from "drizzle-orm/pg-core"
 import { sql } from "drizzle-orm"
 
 export const user = pgTable("User", {
@@ -14,17 +14,19 @@ export const user = pgTable("User", {
 	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 });
 
+export const exerciseType_enum = pgEnum('exercise_type', ['Cardio', 'Equipment', 'Reps Only']);
+
 export const exercises = pgTable("Exercises", {
 	// You can use { mode: "bigint" } if numbers are exceeding js number limitations
 	exerciseId: bigint("exercise_id", { mode: "number" }).primaryKey().generatedByDefaultAsIdentity({ name: "Workout_id_seq", startWith: 1, increment: 1, minValue: 1}),
 	name: varchar().notNull(),
-	category: varchar().notNull(),
+	exerciseType: exerciseType_enum().notNull(),
 	description: text().notNull(),
-	equipment: varchar(),
+	bodyPart: varchar("body_part").notNull(),
 	primaryMuscle: varchar("primary_muscle").notNull(),
 	secondaryMuscle: varchar("secondary_muscle").notNull(),
-	difficulty: varchar().notNull(),
-	caloriesPerMinutes: real("calories_per_minutes").notNull(),
+	metValue: real("met_value").notNull(),
+	intensity: varchar().notNull(),
 	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 });
 
@@ -34,13 +36,11 @@ export const workoutPlans = pgTable("Workout Plans", {
 	// You can use { mode: "bigint" } if numbers are exceeding js number limitations
 	userId: bigint("user_id", { mode: "number" }).notNull(),
 	name: varchar().notNull(),
-	intensity: varchar().notNull(),
+	intensity: varchar(),
 	durationDays: smallint("duration_days").notNull(),
 	goal: varchar().notNull(),
-	progress: smallint().notNull(),
-	startDate: date("start_date").notNull(),
-	endDate: date("end_date").notNull(),
-	completed: boolean().notNull(),
+	progress: smallint().notNull().$default(() => 0),
+	completed: boolean().notNull().$default(() => false),
 	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 }, (table) => {
 	return {
@@ -52,6 +52,8 @@ export const workoutPlans = pgTable("Workout Plans", {
 	}
 });
 
+export const days = pgEnum('day', ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']);
+
 export const userWorkoutExercise = pgTable("User Workout Exercise", {
 	// You can use { mode: "bigint" } if numbers are exceeding js number limitations
 	workoutExerciseId: bigint("workout_exercise_id", { mode: "number" }).primaryKey().generatedByDefaultAsIdentity({ name: "User Workout Exercise_workout_exercise_id_seq", startWith: 1, increment: 1, minValue: 1}),
@@ -62,11 +64,11 @@ export const userWorkoutExercise = pgTable("User Workout Exercise", {
 	sets: smallint(),
 	reps: smallint(),
 	durationMin: real("duration_min"),
-	restTimeSec: smallint("rest_time_sec"),
-	//TODO: add a field for the user to input the weight they used for the exercise
-	//TODO: add a field for the user to input the distance they covered for the exercise
-	//TODO: add a field for the user to input the time they took to complete the exercise
-	//TODO: add a field for the user to input the calories they burned for the exercise
+	weight: real(),
+	distance: real(),
+	restTimePerSec: smallint("rest_time_per_set_sec"),
+	day: days().notNull(),
+	completed: boolean().notNull().$default(() => false),
 	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 }, (table) => {
 	return {
@@ -94,6 +96,8 @@ export const records = pgTable("Records", {
 	setsCompleted: smallint("sets_completed"),
 	repsCompleted: smallint("reps_completed"),
 	durationMin: real("duration_min"),
+	weight: real().notNull(),
+	distance: real(),
 	caloriesBurned: real("calories_burned"),
 	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 }, (table) => {

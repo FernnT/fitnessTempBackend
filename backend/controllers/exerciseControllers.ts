@@ -5,10 +5,11 @@ import { exercises } from "../models/schema";
 export const getExercises = async (req: Request, res: Response) => {
     try {
         const result = await db.select().from(exercises);
-        return res.status(200).send(result)
-         
+         res.status(200).send(result)
+         return;
     } catch (error) {
-        return  res.status(500).send(error.message);
+        res.status(500).send(error.message);
+        return;
         
     }
 }
@@ -18,5 +19,5 @@ export const deleteExercise = (req: Request, res: Response) => {
 }
 
 export const getExerciseByID = (req: Request, res: Response) => {  
-    
-    }
+        
+}
