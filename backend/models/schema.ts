@@ -27,6 +27,7 @@ export const exercises = pgTable("Exercises", {
 	secondaryMuscle: varchar("secondary_muscle").notNull(),
 	metValue: real("met_value").notNull(),
 	intensity: varchar().notNull(),
+	imageUrl: varchar(),
 	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 });
 
