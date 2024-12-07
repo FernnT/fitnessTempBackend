@@ -23,6 +23,18 @@ npm i
 npx drizzle-kit push
 npm run dev
 ```
+##AFTER TEST REGISTER
+```bash
+POST
+http://localhost:3000/auth/register
 
-APIs (not yet finished)
+ "username":"guyNum20",
+    "email":"imguy20@email.com",
+    "password":"december",
+    "age":"24",
+    "gender":"Male",
+    "height":"5.10",
+    "weight":"60"
+```
+API Documentation(not yet finished)
 https://documenter.getpostman.com/view/40110318/2sAYBbeowV
