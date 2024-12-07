@@ -6,6 +6,7 @@ import exerciseRoutes from "./routes/exerciseRoutes";
 import workoutPlanRoutes from "./routes/workoutPlanRoutes";
 import userWorkoutExerciseRoutes from "./routes/userWorkoutExerciseRoutes";
 
+
 const app = express();
 app.use(cors());
 app.use(bodyparser.json());

@@ -5,6 +5,7 @@
   "scripts": {
     "start": "tsx index.ts",
     "dev": "tsx watch index.ts",
+    "drizzle:seed": "tsx ./models/seeder.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",

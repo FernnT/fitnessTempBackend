@@ -93,19 +93,38 @@ export const getWorkoutPlanWithUserWorkoutExerciseById = async (req: AuthRequest
     }
 }
 
+
 export const getWorkoutPlanWithUserWorkoutExerciseAll = async (req: AuthRequest, res: Response) => {
-    //TODO: Implement this and test it
     try {
         const userId = req.user?.id;
-        const result = await db.selectDistinctOn([workoutPlans.planId]).from(workoutPlans).leftJoin(userWorkoutExercise, eq(workoutPlans.planId, userWorkoutExercise.planId)).where(eq(workoutPlans.userId, userId));
-        console.log(result);
-        res.status(200).send(result);
-        return;
-    } catch (error) {
-        res.status(500).send(error.message);
-        return;
+
+        if (!userId) {
+            return res.status(400).send({ error: "User ID is missing from the request." });
+        }
+
+        const result = await db
+            .select({
+                plan: workoutPlans,
+                exercise: userWorkoutExercise,
+            })
+            .from(workoutPlans)
+            .leftJoin(
+                userWorkoutExercise,
+                eq(workoutPlans.planId, userWorkoutExercise.planId)
+            )
+            .where(eq(workoutPlans.userId, userId));
+
+        if (result.length === 0) {
+            return res.status(404).send({ message: "No workout plans or exercises found for the user." });
+        }
+
+        console.log("Fetched workout plans with exercises:", result);
+        res.status(200).json(result);
+    } catch (error: any) {
+        console.error("Error fetching workout plans and exercises:", error);
+        res.status(500).send({ error: "An unexpected error occurred." });
     }
-}
+};
 
 export const updateWorkoutPlan = async (req: Request, res: Response) => {
     //TODO: Implement this and test it
