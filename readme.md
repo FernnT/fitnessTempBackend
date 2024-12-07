@@ -27,7 +27,7 @@ npm run dev
 ```bash
 POST
 http://localhost:3000/auth/register
-
+{
  "username":"guyNum20",
     "email":"imguy20@email.com",
     "password":"december",
@@ -35,6 +35,7 @@ http://localhost:3000/auth/register
     "gender":"Male",
     "height":"5.10",
     "weight":"60"
+}
 ```
 API Documentation(not yet finished)
 https://documenter.getpostman.com/view/40110318/2sAYBbeowV
