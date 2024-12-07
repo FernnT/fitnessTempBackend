@@ -38,5 +38,11 @@ http://localhost:3000/auth/register
     "weight":"60"
 }
 ```
+
+##run the exercises seeder
+```bash
+npm run drizzle:seed
+```
+
 ## API Documentation(not yet finished)
 https://documenter.getpostman.com/view/40110318/2sAYBbeowV
