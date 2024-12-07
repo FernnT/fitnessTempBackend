@@ -19,6 +19,7 @@ JWT_SECRET = 'your secret'
 ```
 4. In you code editor cd backend and type
 ```bash
+cd backend
 npm i
 npx drizzle-kit push
 npm run dev
