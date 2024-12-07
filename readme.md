@@ -39,7 +39,7 @@ http://localhost:3000/auth/register
 }
 ```
 
-##run the exercises seeder
+## Run the exercises seeder
 ```bash
 npm run drizzle:seed
 ```
