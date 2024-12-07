@@ -1,7 +1,7 @@
 # THIS IS A TEMP MAINLY FOR BACKEND DO NOT FOCUS ON THE FRONTEND
 dont mind the frontend I only used to to test api
 
-##TECH STACK
+## TECH STACK
 - **Node.js**
 - **TypeScript**
 - **Express.js**
@@ -9,7 +9,7 @@ dont mind the frontend I only used to to test api
 - **Drizzle ORM**
 - **AI (for workout generation)not yet implemented**
 
-##HOW TO SETUP
+## HOW TO SETUP
 1. Download and install Postgresql
 2. create a database in PgAdmin
 3. create a .env file in the backend folder 
@@ -23,7 +23,7 @@ npm i
 npx drizzle-kit push
 npm run dev
 ```
-##AFTER TEST REGISTER
+## AFTER TEST REGISTER
 ```bash
 POST
 http://localhost:3000/auth/register
@@ -37,5 +37,5 @@ http://localhost:3000/auth/register
     "weight":"60"
 }
 ```
-API Documentation(not yet finished)
+## API Documentation(not yet finished)
 https://documenter.getpostman.com/view/40110318/2sAYBbeowV
