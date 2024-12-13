@@ -35,11 +35,51 @@ export const getWorkoutPlans = async (req: AuthRequest, res: Response) => {
     }
 };
 
-export const deleteWorkoutPlan = (req: Request, res: Response) => {
-    
-}
+export const deleteWorkoutPlan = async (req: AuthRequest, res: Response) => {
+    //TODO: Implement this and test it
+    try {
+        const { id } = req.params; // Workout Plan ID
+        const userId = req.user?.id; // Authenticated User ID
 
-export const getWorkoutPlanByID = async (req: Request, res: Response) => {
+        if (!id) {
+            return res.status(400).send({ error: "Plan ID is required." });
+        }
+
+        if (!userId) {
+            return res.status(401).send({ error: "User not authenticated." });
+        }
+
+        const planId = parseInt(id);
+
+        // Verify the workout plan exists and belongs to the user
+        const workoutPlanExists = await db
+            .select()
+            .from(workoutPlans)
+            .where(and(eq(workoutPlans.planId, planId), eq(workoutPlans.userId, userId)));
+
+        if (workoutPlanExists.length === 0) {
+            return res.status(404).send({ error: "Workout plan not found or does not belong to the user." });
+        }
+
+        // Delete associated userWorkoutExercise records
+        await db
+            .delete(userWorkoutExercise)
+            .where(eq(userWorkoutExercise.planId, planId));
+
+        // Delete the workout plan
+        await db
+            .delete(workoutPlans)
+            .where(eq(workoutPlans.planId, planId));
+
+        console.log(`Deleted workout plan (ID: ${planId}) and its exercises.`);
+        return res.status(200).send({ message: "Workout plan and associated exercises deleted successfully." });
+    } catch (error: any) {
+        console.error("Error deleting workout plan:", error);
+        return res.status(500).send({ error: "An unexpected error occurred." });
+    }
+};
+
+export const getWorkoutPlanByID = async (req: AuthRequest, res: Response) => {
     try {
         const {id} = req.params;
         const result = await db.select().from(workoutPlans).where(eq(workoutPlans.planId, parseInt(id)));
@@ -64,41 +104,79 @@ export const createWorkoutPlan = async(req: AuthRequest, res: Response) => {
 
 }
 
-export const getWorkoutPlanWithUserWorkoutExerciseById = async (req: AuthRequest, res: Response) => {
+export const getWorkoutPlanWithUserWorkoutExerciseById = async (req: AuthRequest,res: Response) => {
     try {
-        const {id} = req.params;
+        const { id } = req.params;
         const userId = req.user?.id;
+
         if (!id) {
-            res.status(400).send("Plan ID is required");
-            return;
+            return res.status(400).send({ error: "Plan ID is required" });
         }
+
         if (!userId) {
-            res.status(401).send("User not authenticated");
-            return;
+            return res.status(401).send({ error: "User not authenticated" });
         }
 
-        const workoutPlansWithExercises = await db.select()
-            .from(workoutPlans).leftJoin(userWorkoutExercise, eq(workoutPlans.planId, userWorkoutExercise.planId))
-            .where(and(
-                eq(workoutPlans.planId, parseInt(id)),
-                eq(workoutPlans.userId, userId)
-            ));
-          //  console.log(workoutPlansWithExercises);
-     
-        res.status(200).send({workoutPlansWithExercises});
-        return;
-    } catch (error) {
-        res.status(500).send(error.message);
-        return;
+        // Fetch the workout plan and its exercises
+        const result = await db
+            .select({
+                plan: workoutPlans,
+                exercise: userWorkoutExercise,
+            })
+            .from(workoutPlans)
+            .leftJoin(
+                userWorkoutExercise,
+                eq(workoutPlans.planId, userWorkoutExercise.planId)
+            )
+            .where(
+                and(
+                    eq(workoutPlans.planId, parseInt(id)),
+                    eq(workoutPlans.userId, userId)
+                )
+            );
+
+        if (result.length === 0) {
+            return res.status(404).send({ error: "Workout plan not found or no exercises associated" });
+        }
+
+        // Structure the response
+        const workoutPlan = {
+            planId: result[0].plan.planId,
+            name: result[0].plan.name,
+            intensity: result[0].plan.intensity,
+            durationDays: result[0].plan.durationDays,
+            goal: result[0].plan.goal,
+            progress: result[0].plan.progress,
+            completed: result[0].plan.completed,
+            createdAt: result[0].plan.createdAt,
+            exercises: result
+                .filter((item) => item.exercise) // Filter out null exercises
+                .map((item) => ({
+                    planId: item.plan.planId,
+                    workoutExerciseId: item.exercise.workoutExerciseId,
+                    exerciseId: item.exercise.exerciseId,
+                    sets: item.exercise.sets,
+                    reps: item.exercise.reps,
+                    durationMin: item.exercise.durationMin,
+                    weight: item.exercise.weight,
+                    distance: item.exercise.distance,
+                    restTimePerSec: item.exercise.restTimePerSec,
+                    day: item.exercise.day,
+                    completed: item.exercise.completed,
+                    createdAt: item.exercise.createdAt,
+                })),
+        };
+
+        console.log("Fetched workout plan with exercises:", workoutPlan);
+        return res.status(200).json(workoutPlan);
+    } catch (error: any) {
+        console.error("Error fetching workout plan by ID:", error);
+        return res.status(500).send({ error: "An unexpected error occurred." });
     }
-}
+};
 
 
-
-export const getWorkoutPlanWithUserWorkoutExerciseAll = async (
-    req: AuthRequest,
-    res: Response
-) => {
+export const getWorkoutPlanWithUserWorkoutExerciseAll = async (req: AuthRequest,res: Response) => {
     try {
         const userId = req.user?.id;
 
@@ -174,8 +252,9 @@ export const getWorkoutPlanWithUserWorkoutExerciseAll = async (
     }
 };
 
-export const updateWorkoutPlan = async (req: Request, res: Response) => {
+export const updateWorkoutPlan = async (req: AuthRequest, res: Response) => {
     //TODO: Implement this and test it
+    //console.log(req.body);
     try {
         const {id} = req.params;
         await db.update(workoutPlans).set({...req.body}).where(eq(workoutPlans.planId, parseInt(id)));
@@ -186,3 +265,4 @@ export const updateWorkoutPlan = async (req: Request, res: Response) => {
         return;
     }
 }
+
